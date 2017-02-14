@@ -1,7 +1,7 @@
 function [node,nodeL,nodeR] = splitNode(data,node,param)
 % Split node
 
-visualise = 0;
+visualise = 1;
 
 % Initilise child nodes
 iter = param.splitNum;
@@ -21,8 +21,9 @@ ig_best = -inf; % Initialise best information gain
 idx_best = [];
 for n = 1:iter
     
-    % Split function - Modify here and try other types of split function
     
+    % Split function - Modify here and try other types of split function
+    if (strcmp(param.split,'Axis Aligned'))
     dim = randi(D-1); % Pick one random dimension
     d_min = single(min(data(:,dim))) + eps; % Find the data range of this dimension
     d_max = single(max(data(:,dim))) - eps;
@@ -37,17 +38,65 @@ for n = 1:iter
     end
     
     [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx_,dim,idx_best);
+    elseif (strcmp(param.split,'Linear'))
+     dim = randi(D-1);
+    
+     for dim=1:D
+    d_min(dim) = single(min(data(:,dim))) - eps; % Find the data range of this dimension
+    d_max(dim) = single(max(data(:,dim))) +  eps;
+     end 
+     
+    notDone=true; 
+    
+    while(notDone)
+     for i =1:2
+      index = randsample(D,1); 
+         for dim = 1:D
+             if (index == dim)
+                  min_max = randsample(2,1); 
+                 if (min_max == 0)
+            choice(i,dim) = d_min(dim);
+                 else 
+            choice(i,dim) = d_max(dim);
+                 end 
+             else 
+             choice(i,dim) = d_min(dim)+(d_max(dim)-d_min(dim))*rand;
+             end 
+             
+         end
+     end 
+     
+     
+     coefficients = polyfit([choice(:,1)], [choice(:,2)], 1);
+    a = coefficients(1);
+    b = coefficients(2);
+    
+    for k=1:length(data)
+        idx_(k) = dot([data(k,1:D-1),1],[a -1 b])<0; 
+    end 
+    if (range(idx_))
+        notDone = false; 
+    end 
+    end
+    ig = getIG(data,idx_); % Calculate information gain
+    
+    if visualise
+        visualise_splitfunclinear(idx_,data,dim,a,b,ig,n);
+        pause();
+     end
+    
+    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,a,idx_,dim,idx_best);
+    
+    else
+        
+      error('specify split');  
+    end
+        
     
 end
 
 nodeL.idx = idx(idx_best);
 nodeR.idx = idx(~idx_best);
-
-if visualise
-    visualise_splitfunc(idx_best,data,dim,t,ig_best,0)
-    fprintf('Information gain = %f. \n',ig_best);
-    pause();
-end
 
 end
 

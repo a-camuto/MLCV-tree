@@ -1,16 +1,17 @@
 %% Load data
+clear; 
 init;
-[data_train, data_test] = getData('Toy_Spiral');
-
+[data_train, data_test] = getData('Toy_Spiral');  
+ 
 %% Bagging
-T=4; % number of data subsets
+T=4; % number of data subsets 
 replacement=true;
-S_t=bagging(T,data_train,replacement,20);
+S_t=bagging(T,data_train,false,50);
 
 param.num = 1;         % Number of trees
-param.depth = 5;        % trees depth
-param.splitNum = 3;     % Number of split functions to try
-param.split = 'IG';     % Currently support 'information gain' only
+param.depth = 2;        % trees depth
+param.splitNum = 8;     % Number of split functions to try
+param.split = 'Linear';     % Currently support 'information gain' only
 
 for i= 1:T
     figure
