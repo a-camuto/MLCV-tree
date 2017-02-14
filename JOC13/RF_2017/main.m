@@ -6,7 +6,8 @@ init;
 T=4; % number of data subsets
 n_t=20
 replacement=true;
-S_t=bagging(T,data_train,replacement,n_t);
+%S_t=bagging(T,data_train,replacement,n_t);
+S_t = data_train
 
 param.num = 1;         % Number of trees
 param.depth = 2;        % trees depth
