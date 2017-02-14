@@ -12,7 +12,7 @@ D = 2;
 param.num = T;
 param.depth = D;
 param.splitNum = 3;
-param.split = 'Axis Aligned';
+param.split = 'IG';
 
 figure(1)
 plot_toydata(data_train);
@@ -39,12 +39,4 @@ end
 
 
 
-%% Evaluate novel data points
-% grab data points (these are the guideline points - so change?)
-test_point = [-.5 -.7; .4 .3; -.7 .4; .5 -.5];
-for n=1:4
-    leaves = testTrees([test_point(n,:) 0],trees);
-    % average the class distributions of leaf nodes of all trees
-    p_rf = trees(1).prob(leaves,:);
-    p_rf_sum = sum(p_rf)/length(trees);
-end
+%% Grow the tree
