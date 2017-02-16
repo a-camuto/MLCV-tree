@@ -2,11 +2,36 @@ function label = testTrees(data,tree)
 % Slow version - pass data point one-by-one
 
 cc = [];
+D = size(data,2);
+
 for T = 1:length(tree)
     for m = 1:size(data,1);
         idx = 1;
         
         while tree(T).node(idx).dim
+     
+            if(tree(T).node(idx).c)
+                c = tree(T).node(idx).c;
+                b = tree(T).node(idx).b;
+                a = tree(T).node(idx).a;
+
+                if (dot([data(m,1).^2,data(m,1),data(m,2:D-1),1],[a b -1 c])<0)
+                    idx = idx*2;
+                else 
+                    idx = idx*2+1;
+
+                end
+            elseif(tree(T).node(idx).a)
+                b = tree(T).node(idx).b;
+                a = tree(T).node(idx).a;
+                
+                if (dot([data(m,1:D-1),1],[a -1 b])<0)
+                    idx = idx*2;
+                else
+                    idx = idx*2+1;
+                end
+
+            else
             t = tree(T).node(idx).t;
             dim = tree(T).node(idx).dim;
             % Decision
@@ -15,7 +40,7 @@ for T = 1:length(tree)
             else
                 idx = idx*2+1; % and to right
             end
-            
+            end
         end
         leaf_idx = tree(T).node(idx).leaf_idx;
         
