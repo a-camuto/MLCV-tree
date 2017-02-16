@@ -25,15 +25,15 @@ for t = 1:T
     figure(2)
     clf
     plot_toydata(data_t)
-    figure(3)
-    clf
-    for L = 1:9
-        try
-        subplot(3,3,L);
-        bar(trees(1).leaf(L).prob);
-        axis([0.5 3.5 0 1]);
-        end
-    end
+%     figure(3)
+%     clf
+%     for L = 1:9
+%         try
+%         subplot(3,3,L);
+%         bar(trees(1).leaf(L).prob);
+%         axis([0.5 3.5 0 1]);
+%         end
+%     end
     pause
 end
 

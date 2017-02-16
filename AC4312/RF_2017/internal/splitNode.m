@@ -42,8 +42,8 @@ for n = 1:iter
      dim = randi(D-1);
     
      for dim=1:D
-    d_min(dim) = single(min(data(:,dim))) - eps; % Find the data range of this dimension
-    d_max(dim) = single(max(data(:,dim))) +  eps;
+    d_min(dim) = single(min(data(:,dim))) + eps; % Find the data range of this dimension
+    d_max(dim) = single(max(data(:,dim))) -  eps;
      end 
      
     notDone=true; 
@@ -87,10 +87,67 @@ for n = 1:iter
     
     [node, ig_best, idx_best] = updateIG(node,ig_best,ig,a,idx_,dim,idx_best);
     
+    
+    elseif (strcmp(param.split,'Non Linear'))
+     dim = randi(D-1);
+    
+     for dim=1:D
+    d_min(dim) = single(min(data(:,dim))) + eps; % Find the data range of this dimension
+    d_max(dim) = single(max(data(:,dim))) -  eps;
+     end 
+     
+    notDone=true; 
+    
+    while(notDone)
+     for i =1:2
+      index = randsample(D,1); 
+         for dim = 1:D
+             if (index == dim)
+                  min_max = randsample(2,1); 
+                 if (min_max == 0)
+            choice(i,dim) = d_min(dim);
+                 else 
+            choice(i,dim) = d_max(dim);
+                 end 
+             else 
+             choice(i,dim) = d_min(dim)+(d_max(dim)-d_min(dim))*rand;
+             end
+             
+             choice(D+1,i) = d_min(i)+(d_max(i)-d_min(i))*rand;
+
+         end
+     end 
+     
+     beta0 = [1;1;1];
+     opts = statset('nlinfit');
+    opts.RobustWgtFun = 'bisquare';
+
+     coefficients = polyfit([choice(:,1)],[choice(:,2)],2); 
+    a = coefficients(1);
+    b = coefficients(2);
+    c = coefficients(3);
+    
+    for k=1:length(data)
+        idx_(k) = dot([data(k,1).^2,data(k,1),data(k,2:D-1),1],[a b -1 c])<0; 
+    end 
+    if (range(idx_))
+        notDone = false; 
+    end 
+    end
+    ig = getIG(data,idx_); % Calculate information gain
+    
+    if visualise
+        visualise_splitfuncnonlinear(idx_,data,dim,a,b,c,ig,n);
+        pause();
+     end
+    
+uyg    
     else
         
       error('specify split');  
     end
+    
+  
         
     
 end
