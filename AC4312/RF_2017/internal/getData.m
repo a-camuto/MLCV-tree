@@ -7,7 +7,7 @@ function [ data_train, data_query ] = getData( MODE )
 %   3. Toy_Circle
 %   4. Caltech 101
 
-showImg = 1; % Show training & testing images and their image feature vector (histogram representation)
+showImg = 0; % Show training & testing images and their image feature vector (histogram representation)
 
 PHOW_Sizes = [4 8 10]; % Multi-resolution, these values determine the scale of each layer.
 PHOW_Step = 8; % The lower the denser. Select from {2,4,8,16}
@@ -126,7 +126,7 @@ switch MODE
         numBins = 256; % for instance,
         
         %custer descriptors into a set of numBIns bins 
-         [IDX, C] = kmeans(desc_sel, C);
+         [C, A] = kmeans(desc_sel, numBins);
         % write your own codes here
         % ...
             
@@ -136,8 +136,13 @@ switch MODE
         
         % write your own codes here
         % ...
-        hist(IDX)
-  
+        for i= 1:size(desc_tr,1)
+               for j= 1:size(desc_tr,2)
+        q_v = quantise(desc_tr{i,j},C); 
+        data_train{i,j}{1} = hist(q_v); 
+        data_train{i,j}{2} = i;
+               end 
+        end 
         
         % Clear unused varibles to save memory
         clearvars desc_tr desc_sel
@@ -185,7 +190,13 @@ switch MODE
         
         % write your own codes here
         % ...
-        
+        for i= 1:size(desc_te,1)
+               for j= 1:size(desc_te,2)
+        q_v = quantise(desc_te{i,j},C); 
+        data_query{i,j}{1} = hist(q_v); 
+        data_query{i,j}{2} = i;
+               end 
+        end 
         
     otherwise % Dense point for 2D toy data
         xrange = [-1.5 1.5];
