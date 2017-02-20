@@ -48,3 +48,7 @@ for n=1:4
     p_rf = trees(1).prob(leaves,:);
     p_rf_sum = sum(p_rf)/length(trees);
 end
+
+%% Q3
+init
+[data_train,data_test]=getData('Caltech');

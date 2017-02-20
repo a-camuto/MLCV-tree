@@ -145,7 +145,7 @@ switch MODE
     case 'Caltech'
         if showImg
         figure('Units','normalized','Position',[.05 .1 .4 .9]);
-        suptitle('Testing image samples');
+        title('Testing image samples');
         end
         disp('Processing testing images...');
         cnt = 1;
