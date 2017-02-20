@@ -50,5 +50,4 @@ for n=1:4
 end
 
 %% Q3
-init
 [data_train,data_test]=getData('Caltech');

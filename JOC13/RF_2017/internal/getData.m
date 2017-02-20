@@ -7,7 +7,7 @@ function [ data_train, data_query ] = getData( MODE )
 %   3. Toy_Circle
 %   4. Caltech 101
 
-showImg = 1; % Show training & testing images and their image feature vector (histogram representation)
+showImg = 0; % Show training & testing images and their image feature vector (histogram representation)
 
 PHOW_Sizes = [4 8 10]; % Multi-resolution, these values determine the scale of each layer.
 PHOW_Step = 8; % The lower the denser. Select from {2,4,8,16}
@@ -128,6 +128,7 @@ switch MODE
         
         % write your own codes here
         % ...
+        [C, A]=vl_kmeans(desc_sel, numBins);
             
        
         disp('Encoding Images...')
@@ -135,6 +136,19 @@ switch MODE
         
         % write your own codes here
         % ...
+        for ObjCat = 1:size(desc_tr,1)
+            for ImgNum = 1:size(desc_tr,2)
+                for DescVecNum = 1:size(desc_tr{ObjCat,ImgNum},2)
+                    Dists = zeros(1,size(C,2));
+                    for Cluster = 1:size(C,2)
+                        %Dists(1,Cluster) = abs(double(C(:,Cluster))-double(desc_tr{ObjCat,ImgNum}(:,DescVecNum))))
+                    end
+                    
+                end
+            end
+        end
+                        
+                        
   
         
         % Clear unused varibles to save memory
