@@ -125,7 +125,8 @@ switch MODE
         % K-means clustering
         numBins = 256; % for instance,
         
-        
+        %custer descriptors into a set of numBIns bins 
+         [IDX, C] = kmeans(desc_sel, C);
         % write your own codes here
         % ...
             
@@ -135,6 +136,7 @@ switch MODE
         
         % write your own codes here
         % ...
+        hist(IDX)
   
         
         % Clear unused varibles to save memory

@@ -41,9 +41,11 @@ for n=1:4
 end
 
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%
 % Train Random Forest
 
 % Grow all trees
+
+
+%%%%%%%%%%%%%%%%%%%%%
+[data_train, data_test] = getData('Caltech');
