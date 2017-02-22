@@ -56,8 +56,9 @@ T = 10;
 D = 2;
 
 param.num = T;
-param.depth = 2;
+param.depth = 10;
 param.splitNum = 10;
 param.split = 'Axis Aligned';
 
 trees = growTrees(data_train,param);
+%% RF codebook
