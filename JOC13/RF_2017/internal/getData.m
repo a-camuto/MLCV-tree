@@ -128,7 +128,7 @@ switch MODE
         
         % write your own codes here
         % ...
-        [C, A]=vl_kmeans(desc_sel, numBins);
+        [C,~]=vl_kmeans(desc_sel, numBins);
             
        
         disp('Encoding Images...')
@@ -136,28 +136,7 @@ switch MODE
         
         % write your own codes here
         % ...
-        
-        figure
-        data_train = cell(size(desc_tr,1),size(desc_tr,2));
-        for ObjCat = 1:size(desc_tr,1)
-            for ImgNum = 1:size(desc_tr,2)
-                ClustIdx = zeros(1,size(desc_tr{ObjCat,ImgNum},2));
-                for DescVecNum = 1:size(desc_tr{ObjCat,ImgNum},2)
-                    Dists = zeros(1,size(C,2));
-                    for Cluster = 1:size(C,2)
-                        Dists(1,Cluster) = norm(double(C(:,Cluster))-double(desc_tr{ObjCat,ImgNum}(:,DescVecNum)));
-                    end
-                    [~, minIdx] = min(Dists);
-                    ClustIdx(1,DescVecNum) = minIdx;
-                end
-                subplot(size(desc_tr,1),size(desc_tr,2),(ObjCat-1)*size(desc_tr,2)+ImgNum)
-                data_train{ObjCat,ImgNum} = {histogram(ClustIdx,size(C,2)),ObjCat};
-            end
-        end
-                        
-                        
-  
-        
+        data_train = quantise(desc_tr,C);
         % Clear unused varibles to save memory
         clearvars desc_tr desc_sel
 end
@@ -204,6 +183,7 @@ switch MODE
         
         % write your own codes here
         % ...
+        data_query = quantise(desc_te,C);
         
         
     otherwise % Dense point for 2D toy data

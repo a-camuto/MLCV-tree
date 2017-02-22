@@ -1,8 +1,8 @@
 % Jack's main file
 
-%% Load data
 clear; 
 init;
+%% Load data
 [data_train, data_test] = getData('Toy_Spiral');  
  
 %% Split first node
