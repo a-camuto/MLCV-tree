@@ -12,7 +12,8 @@ for ObjCat = 1:size(desc,1)
             [~, minIdx] = min(Dists);
             ClustIdx(1,DescVecNum) = minIdx;
         end
-        data((ObjCat-1)*size(desc,2)+ImgNum,1:size(C,2)) = histcounts(ClustIdx,size(C,2));
+        histC = histcounts(ClustIdx,size(C,2));
+        data((ObjCat-1)*size(desc,2)+ImgNum,1:size(C,2))=histC./sum(histC);
         data((ObjCat-1)*size(desc,2)+ImgNum,size(C,2)+1)=ObjCat;
         waitbar(((ObjCat-1)*size(desc,2)+ImgNum)/(size(desc,1)*size(desc,2)))
     end

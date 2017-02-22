@@ -2,7 +2,6 @@
 
 clear; 
 init;
-%% Load data
 [data_train, data_test] = getData('Toy_Spiral');  
  
 %% Split first node
@@ -50,7 +49,7 @@ for n=1:4
 end
 
 %% Q3
-[data_train,data_test]=getData('Caltech');
+[data_train,data_test]=getData('Caltech','kmeans');
 %% grow trees
 T = 10;
 D = 2;
@@ -62,3 +61,4 @@ param.split = 'Axis Aligned';
 
 trees = growTrees(data_train,param);
 %% RF codebook
+[data_train,data_test]=getData('Caltech','rf');
