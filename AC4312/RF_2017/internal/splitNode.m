@@ -50,8 +50,8 @@ for n = 1:iter
     
     while(notDone)
      for i =1:2
-      index = randsample(D,1); 
-         for dim = 1:D
+      index = randsample(D-1,1); 
+         for dim = 1:D-1
              if (index == dim)
                   min_max = randsample(2,1); 
                  if (min_max == 0)
@@ -66,13 +66,14 @@ for n = 1:iter
          end
      end 
      
+     index = randsample(D-1,2,false);
      
-     coefficients = polyfit([choice(:,1)], [choice(:,2)], 1);
+     coefficients = polyfit([choice(:,index(1))], [choice(:,index(2))], 1);
     a = coefficients(1);
     b = coefficients(2);
     
-    for k=1:length(data)
-        idx_(k) = dot([data(k,1:D-1),1],[a -1 b])<0; 
+    for k=1:size(data,1)
+        idx_(k) = dot([data(k,index(1)),data(k,index(2)),1],[a -1 b])<0; 
     end 
     if (range(idx_))
         notDone = false; 
@@ -81,7 +82,7 @@ for n = 1:iter
     ig = getIG(data,idx_); % Calculate information gain
     
     if visualise
-        visualise_splitfunclinear(idx_,data,dim,a,b,ig,n);
+        visualise_splitfunclinear(idx_,data,dim,a,b,ig,n,index);
         pause();
      end
     
@@ -99,10 +100,10 @@ for n = 1:iter
     notDone=true; 
     
     while(notDone)
-     for i =1:2
+     for i =1:3
       index = randsample(D,1); 
-         for dim = 1:D
-             if (index == dim)
+         for dim = 1:D-1
+             if (index == dim && i<3)
                   min_max = randsample(2,1); 
                  if (min_max == 0)
             choice(i,dim) = d_min(dim);
@@ -111,24 +112,19 @@ for n = 1:iter
                  end 
              else 
              choice(i,dim) = d_min(dim)+(d_max(dim)-d_min(dim))*rand;
-             end
-             
-             choice(D+1,i) = d_min(i)+(d_max(i)-d_min(i))*rand;
-
+             end    
          end
      end 
      
-     beta0 = [1;1;1];
-     opts = statset('nlinfit');
-    opts.RobustWgtFun = 'bisquare';
+     index = randsample(D-1,2,false);
 
-     coefficients = polyfit([choice(:,1)],[choice(:,2)],2); 
+     coefficients = polyfit([choice(:,index(1))],[choice(:,index(2))],2); 
     a = coefficients(1);
     b = coefficients(2);
     c = coefficients(3);
     
-    for k=1:length(data)
-        idx_(k) = dot([data(k,1).^2,data(k,1),data(k,2:D-1),1],[a b -1 c])<0; 
+    for k=1:size(data,1)
+        idx_(k) = dot([data(k,index(1)).^2,data(k,index(1)),data(k,index(2)),1],[a b -1 c])<0; 
     end 
     if (range(idx_))
         notDone = false; 
@@ -137,13 +133,26 @@ for n = 1:iter
     ig = getIG(data,idx_); % Calculate information gain
     
     if visualise
-        visualise_splitfuncnonlinear(idx_,data,dim,a,b,c,ig,n);
+        visualise_splitfuncnonlinear(idx_,data,dim,a,b,c,ig,n,index);
         pause();
     end
      
     [node, ig_best, idx_best] = updateIG(node,ig_best,ig,0,idx_,dim,idx_best,a,b,c);
 
+    elseif (strcmp(param.split,'Two Pixel'))
+     dims = randsample(D-1,2,false); % Pick one random dimension
     
+    t_min = single(min(data(:,dims(1))-data(:,dims(2)))) + eps; % Find the data range of this dimension
+    t_min = single(max(data(:,dims(1))-data(:,dims(2)))) -  eps;
+     
+    t = t_min + rand*((t_min-t_min)); % Pick a random value within the range as threshold
+    idx_ = data(:,dims(1))-data(:,dims(2)) < t;
+    
+    ig = getIG(data,idx_); % Calculate information gain
+    
+    
+    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx_,dims(1),idx_best,0,0,0);
+        
     else
         
       error('specify split');  

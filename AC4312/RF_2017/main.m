@@ -48,4 +48,31 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%
+
+%% Data 
 [data_train, data_test] = getData('Caltech');
+
+T=10; % number of data subsets 
+
+param.num = T;         % Number of trees
+param.depth = 10;        % trees depth
+param.splitNum = 10;     % Number of split functions to try
+param.split = 'Non Linear';
+
+trees = growTrees(data_train,param);
+
+
+for n=1:size(data_test,1)
+    leaves = testTrees([data_test(n,:) 0],trees);
+    % average the class distributions of leaf nodes of all trees
+    p_rf = trees(1).prob(leaves,:);
+    p_rf_sum(n,:) = sum(p_rf)/length(trees);
+    [A, class(n)] = max(p_rf_sum(n,:)); 
+end
+%% RF codebook 
+
+
+
+
+
+
