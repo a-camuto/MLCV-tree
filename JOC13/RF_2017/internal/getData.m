@@ -128,7 +128,7 @@ switch MODE
             numBins = 256;
             [C,~]=vl_kmeans(desc_sel, numBins);
             % Vector Quantisation
-            data_train = quantise(desc_tr,C);
+            data_train = quantise_nn(desc_tr,C);
         end
         
         
@@ -147,17 +147,7 @@ switch MODE
             param.splitNum = 4;
             param.split = 'Axis Aligned';
             trees = growTrees(treesInput,param);
-            for ObjCat = 1:size(desc_tr,1)
-                for ImgNum = 1:size(desc_tr,2)
-                    TestDescVect = transpose(desc_tr{ObjCat,ImgNum});
-                    TestDescVect(:,end+1) = ObjCat;
-                    labels = testTrees(TestDescVect,trees);
-                    histC = histcounts(reshape(labels,1,size(labels,1)*size(labels,2)));
-                    data_train((ObjCat-1)*size(desc_tr,2)+ImgNum,1:size(trees(1).prob,1))=histC./sum(histC);
-                    data_train((ObjCat-1)*size(desc_tr,2)+ImgNum,size(trees(1).prob,1)+1)=ObjCat;
-                    waitbar(((ObjCat-1)*size(desc_tr,2)+ImgNum)/(size(desc_tr,1)*size(desc_tr,2)))
-                end
-            end
+            quantise_trees(desc_tr,trees)
         end
        
         disp('Encoding Images...')
@@ -207,7 +197,13 @@ switch MODE
         
         % write your own codes here
         % ...
-        data_query = quantise(desc_te,C);
+        if strcmp(book_type,'kmeans')
+            data_query = quantise_nn(desc_te,C);
+        end
+        if strcmp(book_type,'rf')
+            data_query = quantise_trees(desc_te,trees);
+        end
+        
         
         
     otherwise % Dense point for 2D toy data
