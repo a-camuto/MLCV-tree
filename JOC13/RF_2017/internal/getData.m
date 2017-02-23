@@ -131,17 +131,31 @@ switch MODE
             data_train = quantise(desc_tr,C);
         end
         
-        idx = 1;
-        bar = waitbar(0,'Processing...');
+        
+        
         if strcmp(book_type,'rf')
+            DescVect = cell(size(desc_tr,1));
+            for ObjCat = 1:size(desc_tr,1)
+                DescVect{ObjCat} = cat(2,desc_tr{ObjCat,:});
+                DescVect{ObjCat}(end+1,:) = ObjCat;
+            end
+            treesInput = transpose(single(vl_colsubset(cat(2,DescVect{:}), 10e4)));
+            T = 10;
+            D = 3;
+            param.num = T;
+            param.depth = D;
+            param.splitNum = 4;
+            param.split = 'Axis Aligned';
+            trees = growTrees(treesInput,param);
             for ObjCat = 1:size(desc_tr,1)
                 for ImgNum = 1:size(desc_tr,2)
-                    for DescVecNum = 1:size(desc_tr{ObjCat,ImgNum},2)
-                        rf_input(idx,1:size(desc_tr{1,1},1)) = desc_tr{1,1}(:,DescVecNum);
-                        rf_input(idx,size(desc_tr{1,1},1)+1) = ObjCat;
-                        idx = idx+1;
-                        bar = waitbar(((ObjCat-1)*size(desc_tr,2)+ImgNum)/(size(desc_tr,1)*size(desc_tr,2)),bar,strcat('Vector number:',num2str(DescVecNum)));
-                    end
+                    TestDescVect = transpose(desc_tr{ObjCat,ImgNum});
+                    TestDescVect(:,end+1) = ObjCat;
+                    labels = testTrees(TestDescVect,trees);
+                    histC = histcounts(reshape(labels,1,size(labels,1)*size(labels,2)));
+                    data_train((ObjCat-1)*size(desc_tr,2)+ImgNum,1:size(trees(1).prob,1))=histC./sum(histC);
+                    data_train((ObjCat-1)*size(desc_tr,2)+ImgNum,size(trees(1).prob,1)+1)=ObjCat;
+                    waitbar(((ObjCat-1)*size(desc_tr,2)+ImgNum)/(size(desc_tr,1)*size(desc_tr,2)))
                 end
             end
         end
