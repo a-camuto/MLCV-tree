@@ -132,19 +132,19 @@ switch MODE
         end
         
         idx = 1;
-        bar = waitbar(0,'Processing...')
+        bar = waitbar(0,'Processing...');
         if strcmp(book_type,'rf')
             for ObjCat = 1:size(desc_tr,1)
                 for ImgNum = 1:size(desc_tr,2)
-                    for DescVecNum = 1:size(desc_tr{ObjCat,ImgNum,1})
+                    for DescVecNum = 1:size(desc_tr{ObjCat,ImgNum},2)
                         rf_input(idx,1:size(desc_tr{1,1},1)) = desc_tr{1,1}(:,DescVecNum);
                         rf_input(idx,size(desc_tr{1,1},1)+1) = ObjCat;
-                        bar = waitbar(((ObjCat-1)*size(desc_tr,2)+ImgNum)/(size(desc_tr,1)*size(desc_tr,2)),bar,num2str(DescVecNum))
+                        idx = idx+1;
+                        bar = waitbar(((ObjCat-1)*size(desc_tr,2)+ImgNum)/(size(desc_tr,1)*size(desc_tr,2)),bar,strcat('Vector number:',num2str(DescVecNum)));
                     end
                 end
             end
         end
-        rf_input(1,1:size(desc_tr{1,1},1)) = [];
        
         disp('Encoding Images...')
         
