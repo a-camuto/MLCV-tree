@@ -1,4 +1,4 @@
-function [ data_train, data_query ] = getData( MODE )
+function [ data_train, data_query ] = getData( MODE, book_type)
 % Generate training and testing data
 
 % Data Options:
@@ -125,10 +125,12 @@ switch MODE
         % K-means clustering
         numBins = 256; % for instance,
         
-        %custer descriptors into a set of numBIns bins 
-         [C, A] = kmeans(desc_sel, numBins);
+        
         % write your own codes here
         % ...
+
+        [C,~]=vl_kmeans(desc_sel, numBins)
+       
             
        
         disp('Encoding Images...')
@@ -136,14 +138,7 @@ switch MODE
         
         % write your own codes here
         % ...
-        for i= 1:size(desc_tr,1)
-               for j= 1:size(desc_tr,2)
-        q_v = quantise(desc_tr{i,j},C); 
-        data_train{i,j}{1} = hist(q_v); 
-        data_train{i,j}{2} = i;
-               end 
-        end 
-        
+        data_train = quantise(desc_tr,C);
         % Clear unused varibles to save memory
         clearvars desc_tr desc_sel
 end
@@ -152,7 +147,7 @@ switch MODE
     case 'Caltech'
         if showImg
         figure('Units','normalized','Position',[.05 .1 .4 .9]);
-        suptitle('Testing image samples');
+        title('Testing image samples');
         end
         disp('Processing testing images...');
         cnt = 1;
@@ -190,13 +185,8 @@ switch MODE
         
         % write your own codes here
         % ...
-        for i= 1:size(desc_te,1)
-               for j= 1:size(desc_te,2)
-        q_v = quantise(desc_te{i,j},C); 
-        data_query{i,j}{1} = hist(q_v); 
-        data_query{i,j}{2} = i;
-               end 
-        end 
+        data_query = quantise(desc_te,C);
+        
         
     otherwise % Dense point for 2D toy data
         xrange = [-1.5 1.5];
