@@ -1,4 +1,4 @@
-function [ data_train, data_query ] = getData( MODE, book_type)
+function [ data_train, data_query ] = getData(MODE, book_type, factor)
 % Generate training and testing data
 
 % Data Options:
@@ -122,23 +122,36 @@ switch MODE
         % Build visual vocabulary (codebook) for 'Bag-of-Words method'
         desc_sel = single(vl_colsubset(cat(2,desc_tr{:}), 10e4)); % Randomly select 100k SIFT descriptors for clustering
         
-        % K-means clustering
-        numBins = 256; % for instance,
+        
+        if strcmp(book_type,'kmeans')
+            % K-means clustering
+            numBins = factor;
+            [C,~]=vl_kmeans(desc_sel, numBins);
+            % Vector Quantisation
+            data_train = quantise_nn(desc_tr,C);
+        end
         
         
-        % write your own codes here
-        % ...
-
-        [C,~]=vl_kmeans(desc_sel, numBins)
-       
-            
+        
+        if strcmp(book_type,'rf')
+            DescVect = cell(size(desc_tr,1));
+            for ObjCat = 1:size(desc_tr,1)
+                DescVect{ObjCat} = cat(2,desc_tr{ObjCat,:});
+                DescVect{ObjCat}(end+1,:) = ObjCat;
+            end
+            treesInput = transpose(single(vl_colsubset(cat(2,DescVect{:}), 10e4)));
+            T = factor;
+            D = 3;
+            param.num = T;
+            param.depth = D;
+            param.splitNum = 4;
+            param.split = 'Axis Aligned';
+            trees = growTrees(treesInput,param);
+            data_train = quantise_trees(desc_tr,trees);
+        end
        
         disp('Encoding Images...')
-        % Vector Quantisation
         
-        % write your own codes here
-        % ...
-        data_train = quantise(desc_tr,C);
         % Clear unused varibles to save memory
         clearvars desc_tr desc_sel
 end
@@ -161,7 +174,7 @@ switch MODE
                 I = imread(fullfile(subFolderName,imgList(imgIdx_te(i)).name));
                 
                 % Visualise
-                if i < 6 & showImg
+                if i < 6 && showImg
                     subaxis(length(classList),5,cnt,'SpacingVert',0,'MR',0);
                     imshow(I);
                     cnt = cnt+1;
@@ -175,17 +188,22 @@ switch MODE
             
             end
         end
-        suptitle('Testing image samples');
-                if showImg
+        if showImg
             figure('Units','normalized','Position',[.5 .1 .4 .9]);
-        suptitle('Testing image representations: 256-D histograms');
+            suptitle('Testing image representations: 256-D histograms');
         end
 
         % Quantisation
         
         % write your own codes here
         % ...
-        data_query = quantise(desc_te,C);
+        if strcmp(book_type,'kmeans')
+            data_query = quantise_nn(desc_te,C);
+        end
+        if strcmp(book_type,'rf')
+            data_query = quantise_trees(desc_te,trees);
+        end
+        
         
         
     otherwise % Dense point for 2D toy data
