@@ -1,4 +1,4 @@
-function data = quantise(desc,C)
+function data = quantise_nn(desc,C)
 
 data=zeros(size(desc,1)*size(desc,2),size(C,2)+1);
 for ObjCat = 1:size(desc,1)

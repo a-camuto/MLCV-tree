@@ -48,9 +48,15 @@ for n=1:4
     p_rf_sum = sum(p_rf)/length(trees);
 end
 
-%% Q3
+%% Q3-1. K-means codebook
+% Build visual vocabulary using K-means
 [data_train,data_test]=getData('Caltech','kmeans');
-%% grow trees
+% Vocabulary size:
+
+% Bag-of-words histograms of example training/testing images
+
+%% Q3-2. RF classifier
+% Change parameters
 T = 10;
 D = 2;
 
@@ -60,5 +66,20 @@ param.splitNum = 10;
 param.split = 'Axis Aligned';
 
 trees = growTrees(data_train,param);
-%% RF codebook
+% Recognition accuracy
+
+% Confusion matrix
+
+% Examples success/failures
+
+% Impact of the vocabulary size on classification accuracy
+%% Q3-3. RF codebook
+% Apply RF to descriptor vectors, use RF leaves as visual vocabulary
 [data_train,data_test]=getData('Caltech','rf');
+% Train RF classifier with different parameters
+
+% Recognition accuracy
+
+% Confusion matrix
+
+% Example success/failures

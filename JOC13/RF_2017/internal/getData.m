@@ -147,7 +147,7 @@ switch MODE
             param.splitNum = 4;
             param.split = 'Axis Aligned';
             trees = growTrees(treesInput,param);
-            quantise_trees(desc_tr,trees)
+            data_train = quantise_trees(desc_tr,trees);
         end
        
         disp('Encoding Images...')
