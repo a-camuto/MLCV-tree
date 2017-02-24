@@ -1,37 +1,46 @@
-function visualise_splitfunclinear(idx_best,data,dim,a,b,ig_best,iter,index) % Draw the split line
+function visualise_splitfunclinear(idx_best,data,a,b,ig_best,iter,index) % Draw the split line
 r = [min(data(:,index(1))) max(data(:,index(1)))]; % Data range
 
 subplot(2,2,1);
 
+if (size(data,2)>4)
 y1 = a*r(1) + b;
 y2 = a*r(2) + b;
 
  plot([r(1) r(2)],[y1 y2],'r');
     
+plot(data(~idx_best,index(1)), data(~idx_best,index(2)), '*', 'MarkerEdgeColor', [.8 .6 .6], 'MarkerSize', 5);
 hold on;
+plot(data(idx_best,index(1)), data(idx_best,index(2)), '+', 'MarkerEdgeColor', [.6 .6 .8], 'MarkerSize', 5);
+
+else
 plot(data(~idx_best,index(1)), data(~idx_best,index(2)), '*', 'MarkerEdgeColor', [.8 .6 .6], 'MarkerSize', 10);
 hold on;
 plot(data(idx_best,index(1)), data(idx_best,index(2)), '+', 'MarkerEdgeColor', [.6 .6 .8], 'MarkerSize', 10);
+hold on;
+plot(data(data(:,end)==1,index(1)), data(data(:,end)==1,index(2)), 'o', 'MarkerFaceColor', [.9 .3 .3], 'MarkerEdgeColor','k');
+hold on;
+plot(data(data(:,end)==2,index(1)), data(data(:,end)==2,index(2)), 'o', 'MarkerFaceColor', [.3 .9 .3], 'MarkerEdgeColor','k');
+hold on;
+plot(data(data(:,end)==3,index(1)), data(data(:,end)==3,index(2)), 'o', 'MarkerFaceColor', [.3 .3 .9], 'MarkerEdgeColor','k');
+axis([-1.5 1.5 -1.5 1.5]);
+r = [-1.5 1.5]; 
+y1 = a*r(1) + b;
+y2 = a*r(2) + b;
 
-if (length(data(1,1:end))<4)
-hold on;
-plot(data(data(:,end)==1,1), data(data(:,end)==1,2), 'o', 'MarkerFaceColor', [.9 .3 .3], 'MarkerEdgeColor','k');
-hold on;
-plot(data(data(:,end)==2,1), data(data(:,end)==2,2), 'o', 'MarkerFaceColor', [.3 .9 .3], 'MarkerEdgeColor','k');
-hold on;
-plot(data(data(:,end)==3,1), data(data(:,end)==3,2), 'o', 'MarkerFaceColor', [.3 .3 .9], 'MarkerEdgeColor','k');
+ plot([r(1) r(2)],[y1 y2],'r');
 end
 
 if ~iter
-    title(sprintf('BEST Split [%i]. IG = %4.2f',dim,ig_best));
+    title(sprintf('BEST Split [%i] and [%i] . IG = %4.2f',index(1),index(2),ig_best));
 else
-    title(sprintf('Trial %i - Split [%i]. IG = %4.2f',iter,dim,ig_best));
+    title(sprintf('Trial %i - Split [%i] and [%i]. IG = %4.2f',iter,index(1),index(2),ig_best));
 end
 
 xlabel(strcat('feature ', num2str(index(1))));
 ylabel(strcat('feature ', num2str(index(2))));
 
-% axis([r(1) r(2) r(1) r(2)]);
+% axis([min(data(:,index(1))) max(data(:,index(1))) min(data(:,index(2))) max(data(:,index(2)))]);
 hold off;
 
 % histogram of base node

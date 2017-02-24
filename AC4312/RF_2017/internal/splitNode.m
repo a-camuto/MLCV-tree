@@ -1,7 +1,7 @@
 function [node,nodeL,nodeR] = splitNode(data,node,param)
 % Split node
 
-visualise = 1;
+visualise = 0;
 
 % Initilise child nodes
 iter = param.splitNum;
@@ -82,7 +82,7 @@ for n = 1:iter
     ig = getIG(data,idx_); % Calculate information gain
     
     if visualise
-        visualise_splitfunclinear(idx_,data,dim,a,b,ig,n,index);
+        visualise_splitfunclinear(idx_,data,a,b,ig,n,index);
         pause();
      end
     
@@ -133,23 +133,27 @@ for n = 1:iter
     ig = getIG(data,idx_); % Calculate information gain
     
     if visualise
-        visualise_splitfuncnonlinear(idx_,data,dim,a,b,c,ig,n,index);
+        visualise_splitfuncnonlinear(idx_,data,a,b,c,ig,n,index);
         pause();
     end
      
     [node, ig_best, idx_best] = updateIG(node,ig_best,ig,0,idx_,dim,idx_best,a,b,c);
 
     elseif (strcmp(param.split,'Two Pixel'))
-     dims = randsample(D-1,2,false); % Pick one random dimension
+     dims = randsample(D-1,2,false); % Pick two random dimension
     
     t_min = single(min(data(:,dims(1))-data(:,dims(2)))) + eps; % Find the data range of this dimension
-    t_min = single(max(data(:,dims(1))-data(:,dims(2)))) -  eps;
+    t_max = single(max(data(:,dims(1))-data(:,dims(2)))) -  eps;
      
-    t = t_min + rand*((t_min-t_min)); % Pick a random value within the range as threshold
+    t = t_min + rand*((t_max-t_min)); % Pick a random value within the range as threshold
     idx_ = data(:,dims(1))-data(:,dims(2)) < t;
     
     ig = getIG(data,idx_); % Calculate information gain
     
+    if visualise
+        visualise_splitfunc2pixel(idx_,data,ig,n,dims);
+        pause();
+     end
     
     [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx_,dims(1),idx_best,0,0,0);
         
