@@ -76,15 +76,16 @@ for i=1:4
         end 
         figure    
         suptitle(strcat('Split is: ', param.split, ', T= ', num2str(T)));
-        for l=1:depth_ind-1
-            for j=1:figure_ind-1
-                subplot(figure_ind-1,depth_ind-1,(l-1)*(depth_ind-1)+ j)
-                data_test(:,3) = predict(:,j,l); 
-                plot_toydatatest(data_test); 
-                title(strcat('Depth :', num2str(2+(l-1)*4),', SplitNum :',num2str(1+(j-1)*10  )));
-            end
-        end 
-        data_test(:,3) = zeros(1,size(data_test,1));
+
+    for l=1:depth_ind-1
+    for j=1:figure_ind-1
+        subplot(figure_ind-1,depth_ind-1,(l-1)*(depth_ind-1)+ j)
+        data_test(:,3) = predict(:,j,l); 
+        plot_toydatatest(data_test); 
+        title(strcat('Depth :', num2str(2+(l-1)*4),', SplitNum :',num2str(1+(j-1)*10  )));
+    end
+    end 
+    data_test(:,3) = zeros(1,size(data_test,1));
     end 
 end 
 % trees(i) = growTrees(data_train,param);
@@ -123,51 +124,8 @@ for n=1:size(data_test,1)
     p_rf_sum(n,:) = sum(p_rf)/length(trees);
     [A, class(n)] = max(p_rf_sum(n,:)); 
 end
-%% RF codebook
-[data_train,data_test]=getData('Caltech','rf');
-for i=1:4
-    for T = 2:4:10 % Trees to try
-        depth_ind = 1;
-        for depth = 2:4:10 % Depths to try
-            figure_ind = 1; 
-            for splitNum = 1:10:21 % Number of split functions to try
-                param.num = T; % Number of trees
-                param.depth = depth; % Depth of trees
-                param.splitNum = splitNum; 
-                if i==1
-                param.split = 'Axis Aligned';
-                elseif i==2
-                param.split = 'Linear';
-                elseif i==3
-                param.split = 'Non Linear';
-                else 
-                param.split = 'Two Pixel';
-                end  
-                trees = growTrees(data_train,param);
-                for n=1:size(data_test,1)
-                    leaves = testTrees(data_test(n,:),trees);
-                    % average the class distributions of leaf nodes of all trees
-                    p_rf = trees(1).prob(leaves,:);
-                    p_rf_sum = sum(p_rf)/length(trees);
-                    [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
-                end
-            figure_ind = figure_ind +1; 
-            end         
-        depth_ind = depth_ind + 1; 
-        end 
-        figure    
-        suptitle(strcat('Split is: ', param.split, ', T= ', num2str(T)));
-        for l=1:depth_ind-1
-            for j=1:figure_ind-1
-                subplot(figure_ind-1,depth_ind-1,(l-1)*(depth_ind-1)+ j)
-                data_test(:,3) = predict(:,j,l); 
-                plot_toydatatest(data_test); 
-                title(strcat('Depth :', num2str(2+(l-1)*4),', SplitNum :',num2str(1+(j-1)*10  )));
-            end
-        end 
-        data_test(:,3) = zeros(1,size(data_test,1));
-    end 
-end 
+%% RF codebook 
+
 
 
 
