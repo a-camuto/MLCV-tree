@@ -19,7 +19,7 @@ plot_toydata(data_train)
 title('Training Data')
 figure
 plot_toydata(data_test)
-title('Testing Data')
+title('Testing Data'
 
 for i=1:4
     param.num = T;         % Number of trees
