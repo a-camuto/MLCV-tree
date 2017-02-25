@@ -169,6 +169,7 @@ for book_size = 128:128:256
 for i=1:4
     for T = 2:4:10 % Trees to try
         depth_ind = 1;
+        
         for depth = 2:4:10 % Depths to try
             figure_ind = 1; 
             for splitNum = 1:10:21 % Number of split functions to try
@@ -200,36 +201,25 @@ for i=1:4
                 end 
                 figure
                 plotconfusion(transpose(formatted_labels),transpose(formatted_predictions)); 
-               title(strcat('Codebook: kmeans of size ',size, ' Split is: ', param.split, ', T= ', num2str(T)));
+               title(strcat('Codebook of size:',num2str(book_size), ' Split is: ', param.split, ', T= ', num2str(T), ' Depth: ', num2str(depth),' SplitNum: ',num2str(splitNum)));
                 
             figure_ind = figure_ind +1; 
             end         
         depth_ind = depth_ind + 1; 
         end 
-        figure    
-        suptitle(strcat('Codebook: kmeans of size ',size, ' Split is: ', param.split, ', T= ', num2str(T)));
-        for l=1:depth_ind-1
-            for j=1:figure_ind-1
-                subplot(figure_ind-1,depth_ind-1,(l-1)*(depth_ind-1)+ j)
-                data_test(:,3) = predict(:,j,l); 
-                plot_toydatatest(data_test); 
-                title(strcat('Depth :', num2str(2+(l-1)*4),', SplitNum :',num2str(1+(j-1)*10  )));
-            end
-        end 
-        data_test(:,3) = zeros(1,size(data_test,1));
     end 
 end
 end 
 
 %% RF codebook
-for size_book = 10:10:20
-[data_train,data_test]=getData('Caltech','rf',size_book);
+for book_size = 10:10:20
+[data_train,data_test]=getData('Caltech','rf',book_size);
 for i=1:4
-    for T = 2:4:10 % Trees to try
+    for T = 2:10:20 % Trees to try
         depth_ind = 1;
-        for depth = 2:4:10 % Depths to try
+        for depth = 2:10:20 % Depths to try
             figure_ind = 1; 
-            for splitNum = 1:10:21 % Number of split functions to try
+            for splitNum = 1:10:40 % Number of split functions to try
                 param.num = T; % Number of trees
                 param.depth = depth; % Depth of trees
                 param.splitNum = splitNum; 
@@ -258,23 +248,12 @@ for i=1:4
                 end 
                 figure
                 plotconfusion(transpose(formatted_labels),transpose(formatted_predictions)); 
-               title(strcat('Codebook: kmeans of size ',size, ' Split is: ', param.split, ', T= ', num2str(T)));
+               title(strcat('Codebook Forest of size:',num2str(book_size), ' Split is: ', param.split, ', T= ', num2str(T), ' Depth: ', num2str(depth),' SplitNum: ',num2str(splitNum)));
                 
             figure_ind = figure_ind +1; 
             end         
         depth_ind = depth_ind + 1; 
         end 
-        figure    
-        suptitle(strcat('Codebook: rf of size ',size, ' Split is: ', param.split, ', T= ', num2str(T)));
-        for l=1:depth_ind-1
-            for j=1:figure_ind-1
-                subplot(figure_ind-1,depth_ind-1,(l-1)*(depth_ind-1)+ j)
-                data_test(:,3) = predict(:,j,l); 
-                plot_toydatatest(data_test); 
-                title(strcat('Depth :', num2str(2+(l-1)*4),', SplitNum :',num2str(1+(j-1)*10  )));
-            end
-        end 
-        data_test(:,3) = zeros(1,size(data_test,1));
     end 
 end
 end 

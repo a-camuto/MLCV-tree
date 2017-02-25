@@ -5,8 +5,8 @@ visualise = 0;
 
 % Initilise child nodes
 iter = param.splitNum;
-nodeL = struct('idx',[],'t',nan,'dim',0,'prob',[],'a',0,'b',0,'c',0);
-nodeR = struct('idx',[],'t',nan,'dim',0,'prob',[],'a',0,'b',0,'c',0);
+nodeL = struct('idx',[],'t',nan,'dim',0,'prob',[],'a',0,'b',0,'c',0,'dims',[]);
+nodeR = struct('idx',[],'t',nan,'dim',0,'prob',[],'a',0,'b',0,'c',0,'dims',[]);
 
 if length(node.idx) <= 5 % make this node a leaf if has less than 5 data points
     node.t = nan;
@@ -37,7 +37,7 @@ for n = 1:iter
         pause();
     end
     
-    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx_,dim,idx_best,0,0,0);
+    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx_,dim,idx_best,0,0,0,[]);
     elseif (strcmp(param.split,'Linear'))
      dim = randi(D-1);
     
@@ -86,7 +86,7 @@ for n = 1:iter
         pause();
      end
     
-    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,0,idx_,dim,idx_best,a,b,0);
+    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,0,idx_,dim,idx_best,a,b,0,index);
     
     
     elseif (strcmp(param.split,'Non Linear'))
@@ -137,7 +137,7 @@ for n = 1:iter
         pause();
     end
      
-    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,0,idx_,dim,idx_best,a,b,c);
+    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,0,idx_,dim,idx_best,a,b,c,index);
 
     elseif (strcmp(param.split,'Two Pixel'))
      dims = randsample(D-1,2,false); % Pick two random dimension
@@ -155,7 +155,7 @@ for n = 1:iter
         pause();
      end
     
-    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx_,dims(1),idx_best,0,0,0);
+    [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx_,dims(1),idx_best,0,0,0,dims);
         
     else
         
@@ -188,33 +188,16 @@ cdist= cdist .* log(cdist);
 H = -sum(cdist);
 end
 
-function [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx,dim,idx_best,a,b,c) % Update information gain
+function [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx,dim,idx_best,a,b,c,dims) % Update information gain
 if ig > ig_best
-    if (t)
     ig_best = ig;
     node.t = t;
     node.dim = dim;
+    node.dims = dims;
     idx_best = idx;
-    node.c = 0; 
-    node.b = 0; 
-    node.a = 0; 
-    elseif (c)
-        node.c = c; 
-        node.b = b; 
-        node.a = a; 
-        node.t = 0;
-        node.dim = dim;
-        idx_best = idx;
-        ig_best = ig;
-    else 
-        node.c = 0; 
-        node.b = b; 
-        node.a = a; 
-        node.t = 0;
-        node.dim = dim;
-        idx_best = idx;
-        ig_best = ig;
-    end 
+    node.c = c; 
+    node.b = b; 
+    node.a = a; 
 else
     idx_best = idx_best;
 end

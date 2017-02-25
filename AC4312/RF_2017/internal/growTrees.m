@@ -21,7 +21,7 @@ for T = 1:param.num
     prior = histc(data(idx,end),labels)/length(idx);
     
     % Initialise base node
-    tree(T).node(1) = struct('idx',idx,'t',nan,'dim',-1,'prob',[],'a',0,'b',0,'c',0);
+    tree(T).node(1) = struct('idx',idx,'t',nan,'dim',-1,'prob',[],'a',0,'b',0,'c',0,'dims',[]);
     
     % Split Nodes
     for n = 1:2^(param.depth-1)-1
