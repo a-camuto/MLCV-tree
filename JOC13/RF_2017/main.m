@@ -1,85 +1,267 @@
-% Jack's main file
-
+%% Load data
 clear; 
 init;
+close all;
 [data_train, data_test] = getData('Toy_Spiral');  
  
-%% Split first node
-T = 4;
-D = 2;
+%% Bagging
+T=4; % number of data subsets 
+S_t=bagging(T,data_train,false,50);
+figure
+for i=1:T
+subplot(T/2,T/2,i)
+plot_toydata(S_t(:,:,i)); 
+title(strcat('Subset:',num2str(i)))
+end 
 
-param.num = T;
-param.depth = D;
-param.splitNum = 3;
-param.split = 'Axis Aligned';
+figure
+plot_toydata(data_train)
+title('Training Data')
+figure
+plot_toydata(data_test)
+title('Testing Data')
 
-figure(1)
-plot_toydata(data_train);
-trees = growTrees(data_train,param);
-for t = 1:T
-    idx = trees(t).node.idx;
-    for i = 1:length(idx)
-        data_t(i,:) = data_train(idx(i),:);
+for i=1:4
+    param.num = T;         % Number of trees
+    param.depth = 2;        % trees depth
+    param.splitNum = 1;  
+    if i==1% Number of split functions to try
+        param.split = 'Axis Aligned'; % Currently support 'information gain' only
+    elseif i==2
+        param.split = 'Linear'; % Currently support 'information gain' only
+    elseif i==3
+        param.split = 'Non Linear'; % Currently support 'information gain' only
+    else 
+        param.split = 'Two Pixel'; % Currently support 'information gain' only
+    end  
+    trees = growTrees(data_train,param);
+    figure 
+    for L = 1:9
+        try
+            subplot(3,3,L);
+            bar(trees(1).leaf(L).prob);
+            axis([0.5 3.5 0 1]);
+        end
     end
-    figure(2)
-    clf
-    plot_toydata(data_t)
-%     figure(3)
-%     clf
-%     for L = 1:9
-%         try
-%         subplot(3,3,L);
-%         bar(trees(1).leaf(L).prob);
-%         axis([0.5 3.5 0 1]);
-%         end
-%     end 
-    pause
-end
+end 
 
 
-
-%% Evaluate novel data points
-% grab data points (these are the guideline points - so change?)
-test_point = [-.5 -.7; .4 .3; -.7 .4; .5 -.5];
-for n=1:4
-    leaves = testTrees([test_point(n,:) 0],trees);
+%% Func
+for i=1:4
+    for T = 2:4:10
+        depth_ind = 1;
+        for depth = 2:4:10
+            figure_ind = 1; 
+            for splitNum = 1:10:21
+                param.num = T;         % Number of trees
+                param.depth = depth;        % trees depth
+                param.splitNum = splitNum; 
+                if i==1% Number of split functions to try
+                param.split = 'Axis Aligned'; % Currently support 'information gain' only
+                elseif i==2
+                param.split = 'Linear'; % Currently support 'information gain' only
+                elseif i==3
+                param.split = 'Non Linear'; % Currently support 'information gain' only
+                else 
+                param.split = 'Two Pixel'; % Currently support 'information gain' only
+                end  
+                trees = growTrees(data_train,param);
+                for n=1:size(data_test,1)
+                    leaves = testTrees(data_test(n,:),trees);
+                    % average the class distributions of leaf nodes of all trees
+                    p_rf = trees(1).prob(leaves,:);
+                    p_rf_sum = sum(p_rf)/length(trees);
+                    [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
+                end
+            figure_ind = figure_ind +1; 
+            end         
+        depth_ind = depth_ind + 1; 
+        end 
+        figure    
+        suptitle(strcat('Split is: ', param.split, ', T= ', num2str(T)));
+        for l=1:depth_ind-1
+            for j=1:figure_ind-1
+                subplot(figure_ind-1,depth_ind-1,(l-1)*(depth_ind-1)+ j)
+                data_test(:,3) = predict(:,j,l); 
+                plot_toydatatest(data_test); 
+                title(strcat('Depth :', num2str(2+(l-1)*4),', SplitNum :',num2str(1+(j-1)*10  )));
+            end
+        end 
+        data_test(:,3) = zeros(1,size(data_test,1));
+         figure_ind = 1; 
+            for splitNum = 1:5:11
+param.num = T;         % Number of trees
+param.depth = depth;        % trees depth
+param.splitNum = splitNum; 
+if i==1% Number of split functions to try
+param.split = 'Axis Aligned'; % Currently support 'information gain' only
+elseif i==2
+param.split = 'Linear'; % Currently support 'information gain' only
+elseif i==3
+param.split = 'Non Linear'; % Currently support 'information gain' only
+else 
+param.split = 'Two Pixel'; % Currently support 'information gain' only
+end  
+trees = growTrees(data_train,param);
+for n=1:size(data_test,1)
+    leaves = testTrees(data_test(n,:),trees);
     % average the class distributions of leaf nodes of all trees
     p_rf = trees(1).prob(leaves,:);
     p_rf_sum = sum(p_rf)/length(trees);
+    [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
 end
+figure_ind = figure_ind +1; 
+            end 
+            
+    depth_ind = depth_ind + 1; 
+        end 
+    figure    
+   suptitle(strcat('Split is: ', param.split, ', T= ', num2str(T)));
 
-%% Q3-1. K-means codebook
-% Build visual vocabulary using K-means
-[data_train,data_test]=getData('Caltech','kmeans');
-% Vocabulary size:
+    for l=1:depth_ind-1
+    for j=1:figure_ind-1
+        subplot(figure_ind-1,depth_ind-1,(l-1)*(depth_ind-1)+ j)
+        data_test(:,3) = predict(:,j,l); 
+        plot_toydatatest(data_test); 
+        title(strcat('Depth :', num2str(2+(l-1)*4),', SplitNum :',num2str(1+(j-1)*5  )));
+    end
+    end 
+    data_test(:,3) = zeros(1,size(data_test,1));
+    end 
+% trees(i) = growTrees(data_train,param);
 
-% Bag-of-words histograms of example training/testing images
+%stopping criteria == pram.depth
+% test_point = [-.5 -.7; .4 .3; -.7 .4; .5 -.5];
 
-%% Q3-2. RF classifier
-% Change parameters
-T = 10;
-D = 2;
 
-param.num = T;
-param.depth = 10;
-param.splitNum = 10;
-param.split = 'Axis Aligned';
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+% Train Random Forest
+
+% Grow all trees
+
+
+%%%%%%%%%%%%%%%%%%%%%
+
+%% Data 
+[data_train, data_test] = getData('Caltech');
+
+T=10; % number of data subsets 
+
+param.num = T;         % Number of trees
+param.depth = 10;        % trees depth
+param.splitNum = 10;     % Number of split functions to try
+param.split = 'Non Linear';
 
 trees = growTrees(data_train,param);
-% Recognition accuracy
 
-% Confusion matrix
 
-% Examples success/failures
+for n=1:size(data_test,1)
+    leaves = testTrees([data_test(n,:) 0],trees);
+    % average the class distributions of leaf nodes of all trees
+    p_rf = trees(1).prob(leaves,:);
+    p_rf_sum(n,:) = sum(p_rf)/length(trees);
+    [A, class(n)] = max(p_rf_sum(n,:)); 
+end
+%% Kmeans codebook 
 
-% Impact of the vocabulary size on classification accuracy
-%% Q3-3. RF codebook
-% Apply RF to descriptor vectors, use RF leaves as visual vocabulary
-[data_train,data_test]=getData('Caltech','rf');
-% Train RF classifier with different parameters
 
-% Recognition accuracy
+for book_size = 128:128:256
+[data_train,data_test]=getData('Caltech','kmeans',book_size);
+for i=1:4
+    for T = 2:50:102 % Trees to try
+        depth_ind = 1;
+        
+        for depth = 4:4:12 % Depths to try
+            figure_ind = 1; 
+            for splitNum = 1:10:100 % Number of split functions to try
+                param.num = T; % Number of trees
+                param.depth = depth; % Depth of trees
+                param.splitNum = splitNum; 
+                if i==1
+                param.split = 'Axis Aligned';
+                elseif i==2
+                param.split = 'Linear';
+                elseif i==3
+                param.split = 'Non Linear';
+                else 
+                param.split = 'Two Pixel';
+                end  
+                trees = growTrees(data_train,param);
+                for n=1:size(data_test,1)
+                    leaves = testTrees(data_test(n,:),trees);
+                    % average the class distributions of leaf nodes of all trees
+                    p_rf = trees(1).prob(leaves(leaves~=0),:);
+                    p_rf_sum = sum(p_rf)/length(trees);
+                    [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
+                end
+                formatted_labels = zeros(size(data_test,1),10); 
+                formatted_predictions = zeros(size(data_test,1),10); 
+                for non_zero = 1:size(data_test,1)
+                    formatted_labels(non_zero,data_test(non_zero,size(data_test,2))) = 1; 
+                    formatted_predictions(non_zero,predict(non_zero,figure_ind,depth_ind)) = 1; 
+                end 
+                figure
+                plotconfusion(transpose(formatted_labels),transpose(formatted_predictions)); 
+               title(strcat('Codebook of size:',num2str(book_size), ' Split is: ', param.split, ', T= ', num2str(T), ' Depth: ', num2str(depth),' SplitNum: ',num2str(splitNum)));
+                
+            figure_ind = figure_ind +1; 
+            end         
+        depth_ind = depth_ind + 1; 
+        end 
+    end 
+end
+end 
 
-% Confusion matrix
+%% RF codebook
+for book_size = 10:10:20
+[data_train,data_test]=getData('Caltech','rf',book_size);
+for i=1:4
+    for T = 2:50:102 % Trees to try
+        depth_ind = 1;
+        for depth = 2:50:102 % Depths to try
+            figure_ind = 1; 
+            for splitNum = 1:50:101 % Number of split functions to try
+                param.num = T; % Number of trees
+                param.depth = depth; % Depth of trees
+                param.splitNum = splitNum; 
+                if i==1
+                param.split = 'Axis Aligned';
+                elseif i==2
+                param.split = 'Linear';
+                elseif i==3
+                param.split = 'Non Linear';
+                else 
+                param.split = 'Two Pixel';
+                end  
+                trees = growTrees(data_train,param);
+                for n=1:size(data_test,1)
+                    leaves = testTrees(data_test(n,:),trees);
+                    % average the class distributions of leaf nodes of all trees
+                    p_rf = trees(1).prob(leaves(leaves~=0),:);
+                    p_rf_sum = sum(p_rf)/length(trees);
+                    [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
+                end
+                formatted_labels = zeros(size(data_test,1),10); 
+                formatted_predictions = zeros(size(data_test,1),10); 
+                for non_zero = 1:size(data_test,1)
+                    formatted_labels(non_zero,data_test(non_zero,size(data_test,2))) = 1; 
+                    formatted_predictions(non_zero,predict(non_zero,figure_ind,depth_ind)) = 1; 
+                end 
+                figure
+                plotconfusion(transpose(formatted_labels),transpose(formatted_predictions)); 
+               title(strcat('Codebook Forest of size:',num2str(book_size), ' Split is: ', param.split, ', T= ', num2str(T), ' Depth: ', num2str(depth),' SplitNum: ',num2str(splitNum)));
+                aq1
+            figure_ind = figure_ind +1; 
+            end         
+        depth_ind = depth_ind + 1; 
+        end 
+    end 
+end
+end 
 
-% Example success/failures
+
+
+
+

@@ -10,14 +10,9 @@ S_t=bagging(T,data_train,false,50);
 figure
 for i=1:T
 subplot(T/2,T/2,i)
-<<<<<<< HEAD
 plot_toydata(S_t(:,:,i)); 
-end  
-=======
-plot_toydata(S_t(:,:,i));
 title(strcat('Subset:',num2str(i)))
 end 
->>>>>>> origin/master
 
 figure
 plot_toydata(data_train)
