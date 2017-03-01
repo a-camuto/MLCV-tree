@@ -1,4 +1,4 @@
-function [ data_train, data_query ] = getData(MODE, book_type, factor)
+function [ data_train, data_query ] = getData(MODE, book_type, num_trees, tree_depth, num_split)
 % Generate training and testing data
 
 % Data Options:
@@ -140,11 +140,11 @@ switch MODE
                 DescVect{ObjCat}(end+1,:) = ObjCat;
             end
             treesInput = transpose(single(vl_colsubset(cat(2,DescVect{:}), 10e4)));
-            T = factor;
-            D = 3;
+            T = num_trees;
+            D = tree_depth
             param.num = T;
             param.depth = D;
-            param.splitNum = 4;
+            param.splitNum = num_split;
             param.split = 'Axis Aligned';
             trees = growTrees(treesInput,param);
             data_train = quantise_trees(desc_tr,trees);
