@@ -11,7 +11,7 @@ figure
 for i=1:T
 subplot(T/2,T/2,i)
 plot_toydata(S_t(:,:,i)); 
-end 
+end  
 
 figure
 plot_toydata(data_train)
@@ -167,12 +167,12 @@ end
 for book_size = 128:128:256
 [data_train,data_test]=getData('Caltech','kmeans',book_size);
 for i=1:4
-    for T = 2:4:10 % Trees to try
+    for T = 2:50:102 % Trees to try
         depth_ind = 1;
         
-        for depth = 2:4:10 % Depths to try
+        for depth = 4:4:12 % Depths to try
             figure_ind = 1; 
-            for splitNum = 1:10:21 % Number of split functions to try
+            for splitNum = 1:10:100 % Number of split functions to try
                 param.num = T; % Number of trees
                 param.depth = depth; % Depth of trees
                 param.splitNum = splitNum; 
@@ -189,7 +189,7 @@ for i=1:4
                 for n=1:size(data_test,1)
                     leaves = testTrees(data_test(n,:),trees);
                     % average the class distributions of leaf nodes of all trees
-                    p_rf = trees(1).prob(leaves,:);
+                    p_rf = trees(1).prob(leaves(leaves~=0),:);
                     p_rf_sum = sum(p_rf)/length(trees);
                     [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
                 end
@@ -215,11 +215,11 @@ end
 for book_size = 10:10:20
 [data_train,data_test]=getData('Caltech','rf',book_size);
 for i=1:4
-    for T = 2:10:20 % Trees to try
+    for T = 2:50:102 % Trees to try
         depth_ind = 1;
-        for depth = 2:10:20 % Depths to try
+        for depth = 2:50:102 % Depths to try
             figure_ind = 1; 
-            for splitNum = 1:10:40 % Number of split functions to try
+            for splitNum = 1:50:101 % Number of split functions to try
                 param.num = T; % Number of trees
                 param.depth = depth; % Depth of trees
                 param.splitNum = splitNum; 
@@ -236,7 +236,7 @@ for i=1:4
                 for n=1:size(data_test,1)
                     leaves = testTrees(data_test(n,:),trees);
                     % average the class distributions of leaf nodes of all trees
-                    p_rf = trees(1).prob(leaves,:);
+                    p_rf = trees(1).prob(leaves(leaves~=0),:);
                     p_rf_sum = sum(p_rf)/length(trees);
                     [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
                 end

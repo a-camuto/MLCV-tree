@@ -1,7 +1,7 @@
 function [node,nodeL,nodeR] = splitNode(data,node,param)
 % Split node
 
-visualise = 0;
+visualise = 0 ;
 
 % Initilise child nodes
 iter = param.splitNum;
@@ -28,7 +28,9 @@ for n = 1:iter
     d_min = single(min(data(:,dim))) + eps; % Find the data range of this dimension
     d_max = single(max(data(:,dim))) - eps;
     t = d_min + rand*((d_max-d_min)); % Pick a random value within the range as threshold
-    idx_ = data(:,dim) < t;
+    for k=1:size(data,1)
+    idx_(k) = data(k,dim) < t;
+    end 
     
     ig = getIG(data,idx_); % Calculate information gain
     
@@ -146,7 +148,9 @@ for n = 1:iter
     t_max = single(max(data(:,dims(1))-data(:,dims(2)))) -  eps;
      
     t = t_min + rand*((t_max-t_min)); % Pick a random value within the range as threshold
-    idx_ = data(:,dims(1))-data(:,dims(2)) < t;
+    for k=1:size(data,1)
+    idx_(k) = (data(k,dims(1))-data(k,dims(2))) < t;
+    end
     
     ig = getIG(data,idx_); % Calculate information gain
     
@@ -182,10 +186,15 @@ ig = H - sum(idx)/length(idx)*HL - sum(~idx)/length(idx)*HR;
 end
 
 function H = getE(X) % Entropy
+if(X)
 cdist= histc(X(:,1:end), unique(X(:,end))) + 1;
 cdist= cdist/sum(cdist);
 cdist= cdist .* log(cdist);
+else 
+    cdist = 0; 
+end
 H = -sum(cdist);
+
 end
 
 function [node, ig_best, idx_best] = updateIG(node,ig_best,ig,t,idx,dim,idx_best,a,b,c,dims) % Update information gain
