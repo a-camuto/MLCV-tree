@@ -205,7 +205,6 @@ for i=1:4
                 figure
                 plotconfusion(transpose(formatted_labels),transpose(formatted_predictions)); 
                title(strcat('Codebook of size:',num2str(book_size), ' Split is: ', param.split, ', T= ', num2str(T), ' Depth: ', num2str(depth),' SplitNum: ',num2str(splitNum)));
-                
             figure_ind = figure_ind +1; 
             end         
         depth_ind = depth_ind + 1; 
@@ -215,26 +214,76 @@ end
 end 
 
 %% RF codebook
-for book_size = 10:10:20
-[data_train,data_test]=getData('Caltech','rf',book_size);
-for i=1:4
+% Apply RF to 128 dimensional descriptor vectors with image category labels
+% Use RF leaves as the visual vocabulary
+
+%% Try different parameters of the RF codebook
+for CB_T = [2 5 10]
+    fprintf(strcat('T:',num2str(CB_T)))
+    depth_ind = 1;
+    for CB_D = [2 5 10]
+        fprintf(strcat(',D:',num2str(CB_D)))
+        figure_ind = 1;
+        for CB_S = [2 5 10]
+            fprintf(strcat(',S:',num2str(CB_S),'\n'))
+            [data_train,data_test]=getData_treeVar('Caltech','rf',CB_T,CB_D,CB_S);
+            % Choose RF classifier fixed parameters
+            param.num = 2;
+            param.depth = 2;
+            param.splitNum = 3;
+            param.split = 'Axis Aligned';
+            % Train random forest
+            trees = growTrees(data_train,param);
+            % Test random forest
+            for n=1:size(data_test,1)
+                leaves = testTrees(data_test(n,:),trees);
+                % average the class distributions of leaf nodes of all trees
+                p_rf = trees(1).prob(leaves(leaves~=0),:);
+                p_rf_sum = sum(p_rf)/length(trees);
+                [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
+            end
+            formatted_labels = zeros(size(data_test,1),10); 
+            formatted_predictions = zeros(size(data_test,1),10); 
+            for non_zero = 1:size(data_test,1)
+                formatted_labels(non_zero,data_test(non_zero,size(data_test,2))) = 1; 
+                formatted_predictions(non_zero,predict(non_zero,figure_ind,depth_ind)) = 1; 
+            end 
+            figure
+            plotconfusion(transpose(formatted_labels),transpose(formatted_predictions)); 
+            title(strcat('RF codebook. Split: ', param.split, ', Trees: ', num2str(CB_T), ' Depth: ', num2str(CB_D),' Split Num: ',num2str(CB_S)));
+            figure_ind = figure_ind + 1;
+        end
+        depth_ind = depth_ind + 1;
+    end    
+end
+
+
+%% Try different parameters of the RF classifier
+
+CB_T = 2;
+CB_D = 2;
+CB_S = 3;
+[data_train,data_test]=getData_treeVar('Caltech','rf',CB_T,CB_D,CB_S);
+
+for I=1:4
     for T = 2:50:102 % Trees to try
         depth_ind = 1;
-        for depth = 2:50:102 % Depths to try
+        for D = 2:50:102 % Depths to try
             figure_ind = 1; 
-            for splitNum = 1:50:101 % Number of split functions to try
+            for S = 1:50:101 % Number of split functions to try
                 param.num = T; % Number of trees
-                param.depth = depth; % Depth of trees
-                param.splitNum = splitNum; 
-                if i==1
-                param.split = 'Axis Aligned';
-                elseif i==2
-                param.split = 'Linear';
-                elseif i==3
-                param.split = 'Non Linear';
-                else 
-                param.split = 'Two Pixel';
-                end  
+                param.depth = D; % Depth of trees
+                param.splitNum = S;
+                switch I
+                    case 1
+                        param.split = 'Axis Aligned';
+                    case 2
+                        param.split = 'Linear';
+                    case 3
+                        param.split = 'Non Linear';
+                    case 4
+                        param.split = 'Two Pixel';
+                end
                 trees = growTrees(data_train,param);
                 for n=1:size(data_test,1)
                     leaves = testTrees(data_test(n,:),trees);
@@ -251,7 +300,7 @@ for i=1:4
                 end 
                 figure
                 plotconfusion(transpose(formatted_labels),transpose(formatted_predictions)); 
-               title(strcat('Codebook Forest of size:',num2str(book_size), ' Split is: ', param.split, ', T= ', num2str(T), ' Depth: ', num2str(depth),' SplitNum: ',num2str(splitNum)));
+                title(strcat('Codebook Forest of size:',num2str(book_size), ' Split is: ', param.split, ', T= ', num2str(T), ' Depth: ', num2str(depth),' SplitNum: ',num2str(splitNum)));
                 aq1
             figure_ind = figure_ind +1; 
             end         
@@ -259,9 +308,3 @@ for i=1:4
         end 
     end 
 end
-end 
-
-
-
-
-
