@@ -1,4 +1,4 @@
-function [ data_train, data_query ] = getData(MODE, book_type, num_trees, tree_depth, num_split)
+function [ data_train, data_query ] = getData(MODE, book_type, factor, num_trees, tree_depth, num_split)
 % Generate training and testing data
 
 % Data Options:

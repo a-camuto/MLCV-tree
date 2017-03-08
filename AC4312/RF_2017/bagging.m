@@ -1,9 +1,10 @@
 function subsets = bagging(T,S,replacement,nt)
 
-n = length(S); 
+n = size(S,1); 
 if ~exist('replacement','var')
   replacement=false;
 end
+subsets= zeros(nt,size(S,2),T);
 
 if(replacement)
     
