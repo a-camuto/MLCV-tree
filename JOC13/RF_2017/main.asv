@@ -217,9 +217,16 @@ end
 % Use RF leaves as the visual vocabulary
 
 %% Try different parameters of the RF codebook
-% Changing T:
+T = 10;
+D = 3;
+S = 3;
+split = 'Axis Aligned';
+
 CB_D = 5;
 CB_S = 5;
+% Changing T:
+figure_ind = 1;
+depth_ind = 1;
 for CB_T = [2 5 10]
     codebook_confusion(CB_T,CB_D,CB_S);
 end
@@ -227,14 +234,72 @@ end
 CB_T = 5;
 CB_S = 5;
 for CB_D = [2 5 10]
-    codebook_confusion(CB_T,CB_D,CB_S);
+    fprintf(strcat('|T:',num2str(CB_T),'|D:',num2str(CB_D),'|S:',num2str(CB_S),'|\n'))
+    [data_train,data_test]=getData_treeVar('Caltech','rf',CB_T,CB_D,CB_S);
+    % Choose RF classifier fixed parameters
+    param.num = T;
+    param.depth = D;
+    param.splitNum = S;
+    param.split = split;
+    % Train random forest
+    trees = growTrees(data_train,param);
+    % Test random forest
+    for n=1:size(data_test,1)
+        leaves = testTrees(data_test(n,:),trees);
+        % average the class distributions of leaf nodes of all trees
+        p_rf = trees(1).prob(leaves(leaves~=0),:);
+        p_rf_sum = sum(p_rf)/length(trees);
+        [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
+    end
+    formatted_labels = zeros(size(data_test,1),10); 
+    formatted_predictions = zeros(size(data_test,1),10); 
+    for non_zero = 1:size(data_test,1)
+        formatted_labels(non_zero,data_test(non_zero,size(data_test,2))) = 1; 
+        formatted_predictions(non_zero,predict(non_zero,figure_ind,depth_ind)) = 1; 
+    end 
+    figure
+    plotconfusion(transpose(formatted_labels),transpose(formatted_predictions)); 
+    title(strcat('RF codebook trees: ', num2str(CB_T), ', depth: ', num2str(CB_D),', split number: ',num2str(CB_S)));
+    figure_ind = figure_ind + 1;
+    fprintf('Press any key to continue')
+    pause
 end
 % Changing S:
 CB_T = 5;
 CB_D = 5;
 for CB_S = [2 5 10]
-    codebook_confusion(CB_T,CB_D,CB_S);
+    fprintf(strcat('|T:',num2str(CB_T),'|D:',num2str(CB_D),'|S:',num2str(CB_S),'|\n'))
+    [data_train,data_test]=getData_treeVar('Caltech','rf',CB_T,CB_D,CB_S);
+    % Choose RF classifier fixed parameters
+    param.num = T;
+    param.depth = D;
+    param.splitNum = S;
+    param.split = split;
+    % Train random forest
+    trees = growTrees(data_train,param);
+    % Test random forest
+    for n=1:size(data_test,1)
+        leaves = testTrees(data_test(n,:),trees);
+        % average the class distributions of leaf nodes of all trees
+        p_rf = trees(1).prob(leaves(leaves~=0),:);
+        p_rf_sum = sum(p_rf)/length(trees);
+        [L,predict(n,figure_ind,depth_ind)] = max(p_rf_sum); 
+    end
+    formatted_labels = zeros(size(data_test,1),10); 
+    formatted_predictions = zeros(size(data_test,1),10); 
+    for non_zero = 1:size(data_test,1)
+        formatted_labels(non_zero,data_test(non_zero,size(data_test,2))) = 1; 
+        formatted_predictions(non_zero,predict(non_zero,figure_ind,depth_ind)) = 1; 
+    end 
+    figure
+    plotconfusion(transpose(formatted_labels),transpose(formatted_predictions)); 
+    title(strcat('RF codebook trees: ', num2str(CB_T), ', depth: ', num2str(CB_D),', split number: ',num2str(CB_S)));
+    figure_ind = figure_ind + 1;
+    fprintf('Press any key to continue')
+    pause
 end
+
+
 %% Try different parameters of the RF classifier
 CB_T = 10;
 CB_D = 3;
