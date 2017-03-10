@@ -1,0 +1,10 @@
+clearvars
+km1 = load('results_km1.mat');
+perfsurf(km1.results_km);
+km2 = load('results_km2.mat');
+perfsurf(km2.results_km);
+rf1 = load('results_rf1.mat');
+rf1 = rf1.results_rf;
+rf2 = load('results_rf2.mat');
+rf2 = rf2.results_rf;
+
